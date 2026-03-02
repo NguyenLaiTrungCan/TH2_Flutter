@@ -13,7 +13,7 @@ class NoteSearchBar extends StatelessWidget {
         hintText: 'Tìm kiếm theo tiêu đề...',
         prefixIcon: const Icon(Icons.search),
         filled: true,
-        fillColor: Theme.of(context).colorScheme.surfaceVariant,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(24),
