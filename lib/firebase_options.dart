@@ -15,6 +15,32 @@ import 'package:flutter/foundation.dart'
 /// );
 /// ```
 class DefaultFirebaseOptions {
+  static const String _webApiKey = String.fromEnvironment(
+    'FIREBASE_WEB_API_KEY',
+  );
+  static const String _androidApiKey = String.fromEnvironment(
+    'FIREBASE_ANDROID_API_KEY',
+  );
+  static const String _iosApiKey = String.fromEnvironment(
+    'FIREBASE_IOS_API_KEY',
+  );
+  static const String _macosApiKey = String.fromEnvironment(
+    'FIREBASE_MACOS_API_KEY',
+  );
+  static const String _windowsApiKey = String.fromEnvironment(
+    'FIREBASE_WINDOWS_API_KEY',
+  );
+
+  static String _requireEnv(String value, String key) {
+    if (value.isEmpty) {
+      throw UnsupportedError(
+        'Missing dart-define value for $key. '
+        'Run app with --dart-define=$key=... or configure your IDE launch config.',
+      );
+    }
+    return value;
+  }
+
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
       return web;
@@ -40,8 +66,8 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBBQLH_8mMLn2wydCq8mzWN4TYXQ6JKAkc',
+  static FirebaseOptions get web => FirebaseOptions(
+    apiKey: _requireEnv(_webApiKey, 'FIREBASE_WEB_API_KEY'),
     appId: '1:743080304620:web:11b60b09e44fa9f7ca2ac9',
     messagingSenderId: '743080304620',
     projectId: 'todolist-867ee',
@@ -50,16 +76,16 @@ class DefaultFirebaseOptions {
     measurementId: 'G-BXMS3QV7ZH',
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY',
+  static FirebaseOptions get android => FirebaseOptions(
+    apiKey: _requireEnv(_androidApiKey, 'FIREBASE_ANDROID_API_KEY'),
     appId: '1:743080304620:android:8077a09f2ffe8aa0ca2ac9',
     messagingSenderId: '743080304620',
     projectId: 'todolist-867ee',
     storageBucket: 'todolist-867ee.firebasestorage.app',
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyC1a7uFM6n3U233ve0hw1lNfhXGH6gwFt4',
+  static FirebaseOptions get ios => FirebaseOptions(
+    apiKey: _requireEnv(_iosApiKey, 'FIREBASE_IOS_API_KEY'),
     appId: '1:743080304620:ios:b8099e5b5d16a6adca2ac9',
     messagingSenderId: '743080304620',
     projectId: 'todolist-867ee',
@@ -67,8 +93,8 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.todoList',
   );
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyC1a7uFM6n3U233ve0hw1lNfhXGH6gwFt4',
+  static FirebaseOptions get macos => FirebaseOptions(
+    apiKey: _requireEnv(_macosApiKey, 'FIREBASE_MACOS_API_KEY'),
     appId: '1:743080304620:ios:b8099e5b5d16a6adca2ac9',
     messagingSenderId: '743080304620',
     projectId: 'todolist-867ee',
@@ -76,8 +102,8 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.todoList',
   );
 
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBBQLH_8mMLn2wydCq8mzWN4TYXQ6JKAkc',
+  static FirebaseOptions get windows => FirebaseOptions(
+    apiKey: _requireEnv(_windowsApiKey, 'FIREBASE_WINDOWS_API_KEY'),
     appId: '1:743080304620:web:065f582726daa597ca2ac9',
     messagingSenderId: '743080304620',
     projectId: 'todolist-867ee',
