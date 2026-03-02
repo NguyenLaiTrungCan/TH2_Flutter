@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:todo_list/models/note.dart';
 
 class Storage {
@@ -29,5 +31,26 @@ class Storage {
   static Future<void> clearNotes() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_kNotesKey);
+  }
+
+  /// Save an attachment file by copying it into the app documents/attachments
+  /// folder and returning the new absolute path. If copy fails, returns the
+  /// original `srcPath`.
+  static Future<String> saveAttachment(String srcPath) async {
+    try {
+      final src = File(srcPath);
+      if (!await src.exists()) return srcPath;
+      final appDir = await getApplicationDocumentsDirectory();
+      final attachDir = Directory('${appDir.path}/attachments');
+      if (!await attachDir.exists()) {
+        await attachDir.create(recursive: true);
+      }
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${src.uri.pathSegments.last}';
+      final dest = File('${attachDir.path}/$fileName');
+      await src.copy(dest.path);
+      return dest.path;
+    } catch (_) {
+      return srcPath;
+    }
   }
 }

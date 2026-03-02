@@ -6,6 +6,7 @@ import 'package:todo_list/widgets/note_card.dart';
 import 'package:todo_list/screens/note_edit_screen.dart';
 import 'package:todo_list/screens/note_create_screen.dart';
 import 'package:todo_list/services/storage.dart';
+import 'package:todo_list/services/theme_manager.dart';
 import 'package:todo_list/widgets/search_bar.dart';
 
 const String studentName = 'Nguyễn Lại Trung Cần';
@@ -71,6 +72,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Smart Note - $studentName - $studentId'),
+        actions: [
+          IconButton(
+            tooltip: 'Chủ đề',
+            icon: const Icon(Icons.palette),
+            onPressed: _openThemeDialog,
+          ),
+        ],
         centerTitle: false,
       ),
       body: SafeArea(
@@ -162,6 +170,39 @@ class _HomeScreenState extends State<HomeScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  void _openThemeDialog() async {
+    final current = ThemeManager().themeIndex.value;
+    final selected = await showDialog<int>(
+      context: context,
+      builder: (ctx) {
+        return SimpleDialog(
+          title: const Text('Chọn chủ đề'),
+          children: List.generate(6, (i) {
+            final names = ['Teal (mặc định)', 'Indigo', 'Deep Orange', 'Pink', 'Green', 'Blue Grey'];
+            final colors = [
+              Colors.teal,
+              Colors.indigo,
+              Colors.deepOrange,
+              Colors.pink,
+              Colors.green,
+              Colors.blueGrey,
+            ];
+            return RadioListTile<int>(
+              value: i,
+              groupValue: current,
+              title: Text(names[i]),
+              secondary: CircleAvatar(backgroundColor: colors[i]),
+              onChanged: (v) => Navigator.of(ctx).pop(v),
+            );
+          }),
+        );
+      },
+    );
+    if (selected != null) {
+      await ThemeManager().setTheme(selected);
+    }
   }
 
   void _showAddNoteSheet() async {
