@@ -46,6 +46,34 @@ Ghi chú và lỗi thường gặp
 - Trên iOS, chạy `pod install` trong `ios/` nếu cần (`cd ios && pod install`).
 - Bạn có thể dùng `flutterfire configure` để sinh các tệp cấu hình tự động cho nhiều môi trường.
 
+Google Sign-In trên Windows
+- Dự án đã hỗ trợ đăng nhập Google trên Windows qua `desktop_webview_auth`.
+- Lần build đầu tiên trên Windows, plugin sẽ tải `nuget.exe` và các gói WebView2/WIL. Dòng `Nuget is not installed` và `Attempting to download nuget` chỉ là thông báo.
+- Cần truyền thêm biến sau khi chạy:
+
+```bash
+flutter run -d windows --dart-define=FIREBASE_GOOGLE_DESKTOP_CLIENT_ID=YOUR_GOOGLE_OAUTH_CLIENT_ID
+```
+
+- `YOUR_GOOGLE_OAUTH_CLIENT_ID` phải là Google OAuth client có redirect URI:
+
+```text
+https://todolist-867ee.firebaseapp.com/__/auth/handler
+```
+
+- Nếu mạng chặn tải NuGet, hãy cài NuGet thủ công hoặc chạy lại build khi có internet.
+- Cảnh báo `CMP0175` từ plugin hiện là cảnh báo CMake, không phải lỗi build chính.
+
+Google Sign-In trên Android
+- Nếu đăng nhập Google báo `PlatformException(sign_in_failed)` hoặc `ApiException: 10`, nguyên nhân gần như luôn là cấu hình OAuth Android chưa đúng.
+- Dấu hiệu trong repo hiện tại: file `android/app/google-services.json` đang có `oauth_client: []`, nghĩa là Firebase chưa sinh OAuth client cho Android app.
+- Cách sửa:
+  1. Vào Firebase Console > Project settings > app Android `com.example.todo_list`.
+  2. Thêm SHA-1 và SHA-256 của debug keystore và release keystore.
+  3. Vào Authentication > Sign-in method, bật Google.
+  4. Tải lại `google-services.json` mới và chép đè vào `android/app/google-services.json`.
+  5. Chạy lại `flutter clean` rồi `flutter pub get`.
+
 Bước 6 — Khi đã lộ key trên git
 - Rotate (tạo mới) các Firebase API key trong Google Cloud Console.
 - Áp giới hạn key theo app (Android package + SHA-1, iOS bundle id, HTTP referrer cho web nếu cần).

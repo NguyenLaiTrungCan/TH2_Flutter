@@ -1,0 +1,47 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter (Edge + Firebase Defines)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "edge",
+      "args": [
+        "--dart-define=FIREBASE_WEB_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_ANDROID_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_IOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_MACOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_WINDOWS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY"
+      ]
+    },
+    {
+      "name": "Flutter (Chrome + Firebase Defines)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "args": [
+        "--dart-define=FIREBASE_WEB_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_ANDROID_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_IOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_MACOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_WINDOWS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY"
+      ]
+    },
+    {
+      "name": "Flutter (Android + Firebase Defines)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "android",
+      "args": [
+        "--dart-define=FIREBASE_WEB_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_ANDROID_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_IOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_MACOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=FIREBASE_WINDOWS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY"
+      ]
+    }
+  ]
+}

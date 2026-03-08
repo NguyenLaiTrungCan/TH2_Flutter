@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:todo_list/firebase_options.dart';
 import 'package:todo_list/screens/home_screen.dart';
+import 'package:todo_list/screens/login_screen.dart';
 import 'package:todo_list/services/theme_manager.dart';
 
 Future<void> main() async {
@@ -22,11 +24,6 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
       valueListenable: ThemeManager().themeIndex,
@@ -34,7 +31,20 @@ class _MainAppState extends State<MainApp> {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeManager.themeDataForIndex(idx),
-          home: const HomeScreen(),
+          home: StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
+              if (snapshot.hasData && snapshot.data != null) {
+                return const HomeScreen();
+              }
+              return const LoginScreen();
+            },
+          ),
         );
       },
     );

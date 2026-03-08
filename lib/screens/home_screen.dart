@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +7,7 @@ import 'package:todo_list/models/note.dart';
 import 'package:todo_list/widgets/note_card.dart';
 import 'package:todo_list/screens/note_edit_screen.dart';
 import 'package:todo_list/screens/note_create_screen.dart';
+import 'package:todo_list/services/auth_service.dart';
 import 'package:todo_list/services/storage.dart';
 import 'package:todo_list/services/theme_manager.dart';
 import 'package:todo_list/widgets/search_bar.dart';
@@ -13,7 +16,9 @@ const String studentName = 'Nguyễn Lại Trung Cần';
 const String studentId = '2351060421';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String? welcomeName;
+
+  const HomeScreen({super.key, this.welcomeName});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -26,25 +31,47 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Note> _allNotes = [];
 
   List<Note> _filteredNotes = [];
+  StreamSubscription<List<Note>>? _notesSub;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
-    _loadNotes();
+    _subscribeNotes();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final welcomeName = widget.welcomeName?.trim();
+      if (!mounted || welcomeName == null || welcomeName.isEmpty) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Xin chào, $welcomeName!')),
+      );
+    });
   }
 
-  Future<void> _loadNotes() async {
-    final loaded = await Storage.loadNotes();
-    setState(() {
-      _allNotes.clear();
-      _allNotes.addAll(loaded);
-      _filteredNotes = List.from(_allNotes);
-    });
+  void _subscribeNotes() {
+    _notesSub = Storage.notesStream().listen(
+      (notes) {
+        if (!mounted) return;
+        setState(() {
+          _allNotes
+            ..clear()
+            ..addAll(notes);
+          _onSearchChanged();
+        });
+      },
+      onError: (error) => _showStorageError('lắng nghe', error),
+    );
+  }
+
+  void _showStorageError(String action, Object error) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Lỗi $action dữ liệu Firebase: $error')),
+    );
   }
 
   @override
   void dispose() {
+    _notesSub?.cancel();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     _titleController.dispose();
@@ -68,16 +95,90 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final dateFmt = DateFormat('dd/MM/yyyy HH:mm');
+    final user = AuthService.currentUser;
+    final displayName = user?.displayName ?? user?.email ?? 'Người dùng';
+    final photoUrl = user?.photoURL;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Smart Note - $studentName - $studentId'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Smart Note - $studentName', style: const TextStyle(fontSize: 15)),
+            Text(studentId, style: const TextStyle(fontSize: 11)),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: 'Chủ đề',
             icon: const Icon(Icons.palette),
             onPressed: _openThemeDialog,
           ),
+          PopupMenuButton<String>(
+            tooltip: 'Tài khoản',
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: photoUrl != null
+                  ? CircleAvatar(
+                      radius: 18,
+                      backgroundImage: NetworkImage(photoUrl),
+                    )
+                  : CircleAvatar(
+                      radius: 18,
+                      child: Text(
+                        displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+            ),
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                enabled: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    if (user?.email != null)
+                      Text(user!.email!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, size: 20),
+                    SizedBox(width: 8),
+                    Text('Đăng xuất'),
+                  ],
+                ),
+              ),
+            ],
+            onSelected: (value) async {
+              if (value == 'logout') {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Đăng xuất'),
+                    content: const Text('Bạn có chắc muốn đăng xuất?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: const Text('Hủy'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        child: const Text('Đăng xuất'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) await AuthService.signOut();
+              }
+            },
+          ),
+          const SizedBox(width: 4),
         ],
         centerTitle: false,
       ),
@@ -128,11 +229,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               return res == true;
                             },
                             onDismissed: (direction) async {
-                              setState(() {
-                                _allNotes.removeWhere((n) => n.id == note.id);
-                                _onSearchChanged();
-                              });
-                              await Storage.saveNotes(_allNotes);
+                              try {
+                                await Storage.deleteNote(note.id);
+                              } catch (error) {
+                                _showStorageError('xóa', error);
+                              }
                             },
                             child: InkWell(
                               onTap: () async {
@@ -142,14 +243,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 );
                                 if (updated != null) {
-                                  setState(() {
-                                    final origIndex = _allNotes.indexWhere((n) => n.id == updated.id);
-                                    if (origIndex != -1) {
-                                      _allNotes[origIndex] = updated;
-                                    }
-                                    _onSearchChanged();
-                                  });
-                                  await Storage.saveNotes(_allNotes);
+                                  try {
+                                    await Storage.updateNote(updated);
+                                  } catch (error) {
+                                    _showStorageError('cập nhật', error);
+                                  }
                                 }
                               },
                               child: NoteCard(
@@ -179,24 +277,30 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx) {
         return SimpleDialog(
           title: const Text('Chọn chủ đề'),
-          children: List.generate(6, (i) {
-            final names = ['Teal (mặc định)', 'Indigo', 'Deep Orange', 'Pink', 'Green', 'Blue Grey'];
-            final colors = [
-              Colors.teal,
-              Colors.indigo,
-              Colors.deepOrange,
-              Colors.pink,
-              Colors.green,
-              Colors.blueGrey,
-            ];
-            return RadioListTile<int>(
-              value: i,
+          children: [
+            RadioGroup<int>(
               groupValue: current,
-              title: Text(names[i]),
-              secondary: CircleAvatar(backgroundColor: colors[i]),
               onChanged: (v) => Navigator.of(ctx).pop(v),
-            );
-          }),
+              child: Column(
+                children: List.generate(6, (i) {
+                  const names = ['Teal (mặc định)', 'Indigo', 'Deep Orange', 'Pink', 'Green', 'Blue Grey'];
+                  final colors = [
+                    Colors.teal,
+                    Colors.indigo,
+                    Colors.deepOrange,
+                    Colors.pink,
+                    Colors.green,
+                    Colors.blueGrey,
+                  ];
+                  return RadioListTile<int>(
+                    value: i,
+                    title: Text(names[i]),
+                    secondary: CircleAvatar(backgroundColor: colors[i]),
+                  );
+                }),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -210,11 +314,11 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(builder: (_) => const NoteCreateScreen()),
     );
     if (created != null) {
-      setState(() {
-        _allNotes.insert(0, created);
-        _onSearchChanged();
-      });
-      await Storage.saveNotes(_allNotes);
+      try {
+        await Storage.addNote(created);
+      } catch (error) {
+        _showStorageError('thêm', error);
+      }
     }
   }
 
@@ -228,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Icon(
             Icons.note_alt_outlined,
             size: 120,
-            color: Colors.grey.withOpacity(0.25),
+            color: Colors.grey.withValues(alpha: 0.25),
           ),
           const SizedBox(height: 16),
           const Text(

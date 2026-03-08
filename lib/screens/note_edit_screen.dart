@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:todo_list/models/note.dart';
-import 'package:todo_list/services/storage.dart';
 
 class NoteEditScreen extends StatefulWidget {
   final Note note;
@@ -20,20 +17,6 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   final ImagePicker _picker = ImagePicker();
   late List<String> _attachments;
 
-  Future<bool> _onWillPop() async {
-    final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
-    if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tiêu đề không được để trống')),
-      );
-      return false;
-    }
-    final updated = Note(id: widget.note.id, title: title, content: content, modifiedAt: DateTime.now());
-    Navigator.of(context).pop(updated);
-    return false;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -49,23 +32,23 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
     super.dispose();
   }
 
-  void _save() {
-    final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
-    if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tiêu đề không được để trống')),
-      );
-      return;
-    }
-    final updated = Note(id: widget.note.id, title: title, content: content, attachments: _attachments, modifiedAt: DateTime.now());
-    Navigator.of(context).pop(updated);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        final title = _titleController.text.trim();
+        final content = _contentController.text.trim();
+        if (title.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Tiêu đề không được để trống')),
+          );
+          return;
+        }
+        final updated = Note(id: widget.note.id, title: title, content: content, attachments: _attachments, modifiedAt: DateTime.now());
+        Navigator.of(context).pop(updated);
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Xem / Sửa ghi chú'),
@@ -113,10 +96,10 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                             height: 100,
                             color: Colors.grey[200],
                             child: isImage
-                                ? Image.file(File(path), fit: BoxFit.cover)
+                                ? Image.network(path, fit: BoxFit.cover)
                                 : Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [const Icon(Icons.videocam, size: 36), Text(File(path).uri.pathSegments.last, overflow: TextOverflow.ellipsis)],
+                                    children: [const Icon(Icons.videocam, size: 36), Text(path.split('/').last, overflow: TextOverflow.ellipsis)],
                                   ),
                           ),
                           Positioned(
@@ -152,14 +135,12 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   Future<void> _pickImage() async {
     final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
     if (file == null) return;
-    final saved = await Storage.saveAttachment(file.path);
-    setState(() => _attachments.add(saved));
+    setState(() => _attachments.add(file.path));
   }
 
   Future<void> _pickVideo() async {
     final XFile? file = await _picker.pickVideo(source: ImageSource.gallery);
     if (file == null) return;
-    final saved = await Storage.saveAttachment(file.path);
-    setState(() => _attachments.add(saved));
+    setState(() => _attachments.add(file.path));
   }
 }

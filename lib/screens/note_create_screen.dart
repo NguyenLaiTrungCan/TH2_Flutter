@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:todo_list/models/note.dart';
-import 'package:todo_list/services/storage.dart';
 
 class NoteCreateScreen extends StatefulWidget {
   const NoteCreateScreen({super.key});
@@ -32,24 +29,23 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     super.dispose();
   }
 
-  Future<bool> _onWillPop() async {
-    final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
-    if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tiêu đề không được để trống')),
-      );
-      return false;
-    }
-    final note = Note(title: title, content: content, attachments: _attachments, modifiedAt: DateTime.now());
-    Navigator.of(context).pop(note);
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        final title = _titleController.text.trim();
+        final content = _contentController.text.trim();
+        if (title.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Tiêu đề không được để trống')),
+          );
+          return;
+        }
+        final note = Note(title: title, content: content, attachments: _attachments, modifiedAt: DateTime.now());
+        Navigator.of(context).pop(note);
+      },
       child: Scaffold(
         appBar: AppBar(
           leading: BackButton(),
@@ -98,10 +94,10 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                             height: 100,
                             color: Colors.grey[200],
                             child: isImage
-                                ? Image.file(File(path), fit: BoxFit.cover)
+                                ? Image.network(path, fit: BoxFit.cover)
                                 : Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [const Icon(Icons.videocam, size: 36), Text(File(path).uri.pathSegments.last, overflow: TextOverflow.ellipsis)],
+                                    children: [const Icon(Icons.videocam, size: 36), Text(path.split('/').last, overflow: TextOverflow.ellipsis)],
                                   ),
                           ),
                           Positioned(
@@ -137,14 +133,12 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   Future<void> _pickImage() async {
     final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
     if (file == null) return;
-    final saved = await Storage.saveAttachment(file.path);
-    setState(() => _attachments.add(saved));
+    setState(() => _attachments.add(file.path));
   }
 
   Future<void> _pickVideo() async {
     final XFile? file = await _picker.pickVideo(source: ImageSource.gallery);
     if (file == null) return;
-    final saved = await Storage.saveAttachment(file.path);
-    setState(() => _attachments.add(saved));
+    setState(() => _attachments.add(file.path));
   }
 }
