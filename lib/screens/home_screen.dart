@@ -8,6 +8,7 @@ import 'package:todo_list/widgets/note_card.dart';
 import 'package:todo_list/screens/note_edit_screen.dart';
 import 'package:todo_list/screens/note_create_screen.dart';
 import 'package:todo_list/services/auth_service.dart';
+import 'package:todo_list/services/google_calendar_service.dart';
 import 'package:todo_list/services/storage.dart';
 import 'package:todo_list/services/theme_manager.dart';
 import 'package:todo_list/widgets/search_bar.dart';
@@ -26,8 +27,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
   final List<Note> _allNotes = [];
 
   List<Note> _filteredNotes = [];
@@ -74,8 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _notesSub?.cancel();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
-    _titleController.dispose();
-    _contentController.dispose();
     super.dispose();
   }
 
@@ -118,18 +115,19 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'Tài khoản',
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: photoUrl != null
-                  ? CircleAvatar(
-                      radius: 18,
-                      backgroundImage: NetworkImage(photoUrl),
-                    )
-                  : CircleAvatar(
-                      radius: 18,
-                      child: Text(
-                        displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
+              child: CircleAvatar(
+                radius: 18,
+                foregroundImage: (photoUrl != null && photoUrl.trim().isNotEmpty)
+                    ? NetworkImage(photoUrl)
+                    : null,
+                onForegroundImageError: (Object error, StackTrace? stackTrace) {
+                  // Ignore avatar fetch failures (e.g. Google 429) and keep fallback text.
+                },
+                child: Text(
+                  displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
             itemBuilder: (_) => [
               PopupMenuItem(
@@ -251,7 +249,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 }
                               },
                               child: NoteCard(
-                                  note: note, timeText: dateFmt.format(note.modifiedAt)),
+                                note: note,
+                                timeText: dateFmt.format(note.modifiedAt),
+                                dueText: note.dueAt != null
+                                    ? dateFmt.format(note.dueAt!)
+                                    : null,
+                                onAddToCalendar:
+                                    GoogleCalendarService.canCreateEvent(note)
+                                    ? () => _addToGoogleCalendar(note)
+                                    : null,
+                              ),
                             ),
                           );
                         },
@@ -319,6 +326,29 @@ class _HomeScreenState extends State<HomeScreen> {
       } catch (error) {
         _showStorageError('thêm', error);
       }
+    }
+  }
+
+  Future<void> _addToGoogleCalendar(Note note) async {
+    if (!GoogleCalendarService.canCreateEvent(note)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hãy thêm ngày giờ trước khi đồng bộ Google Calendar.'),
+        ),
+      );
+      return;
+    }
+
+    final opened = await GoogleCalendarService.openCreateEvent(note);
+    if (!mounted) return;
+
+    if (!opened) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không thể mở Google Calendar trên thiết bị này.'),
+        ),
+      );
     }
   }
 

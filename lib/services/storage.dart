@@ -25,6 +25,7 @@ class Storage {
                 title: (data['title'] as String?) ?? '',
                 content: (data['content'] as String?) ?? '',
                 attachments: _asStringList(data['attachments']),
+                dueAt: _parseDateTime(data['dueAt']),
                 modifiedAt: _parseModifiedAt(data['modifiedAt']),
               );
             }).toList());
@@ -44,6 +45,7 @@ class Storage {
           title: (data['title'] as String?) ?? '',
           content: (data['content'] as String?) ?? '',
           attachments: _asStringList(data['attachments']),
+          dueAt: _parseDateTime(data['dueAt']),
           modifiedAt: _parseModifiedAt(data['modifiedAt']),
         );
       }).toList();
@@ -93,6 +95,7 @@ class Storage {
         'title': note.title,
         'content': note.content,
         'attachments': note.attachments,
+        'dueAt': note.dueAt != null ? Timestamp.fromDate(note.dueAt!) : null,
         'modifiedAt': Timestamp.fromDate(note.modifiedAt),
       };
 
@@ -104,13 +107,19 @@ class Storage {
   }
 
   static DateTime _parseModifiedAt(dynamic value) {
+    return _parseDateTime(value) ?? DateTime.now();
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
     if (value is Timestamp) {
       return value.toDate();
     }
     if (value is String) {
       final parsed = DateTime.tryParse(value);
-      if (parsed != null) return parsed;
+      if (parsed != null) {
+        return parsed;
+      }
     }
-    return DateTime.now();
+    return null;
   }
 }

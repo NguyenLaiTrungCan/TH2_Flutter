@@ -12,7 +12,10 @@
         "--dart-define=FIREBASE_ANDROID_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
         "--dart-define=FIREBASE_IOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
         "--dart-define=FIREBASE_MACOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
-        "--dart-define=FIREBASE_WINDOWS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY"
+        "--dart-define=FIREBASE_WINDOWS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=SUPABASE_URL=https://wnpbzthhscdswpznbtar.supabase.co",
+        "--dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducGJ6dGhoc2Nkc3dwem5idGFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMzQxMTIsImV4cCI6MjA4ODYxMDExMn0.hxugZkNt9uWYuCRjXfrb_RX2xI7GrzoU4ErKPnC6VtQ",
+        "--dart-define=SUPABASE_BUCKET=note-media"
       ]
     },
     {
@@ -26,7 +29,10 @@
         "--dart-define=FIREBASE_ANDROID_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
         "--dart-define=FIREBASE_IOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
         "--dart-define=FIREBASE_MACOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
-        "--dart-define=FIREBASE_WINDOWS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY"
+        "--dart-define=FIREBASE_WINDOWS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=SUPABASE_URL=https://wnpbzthhscdswpznbtar.supabase.co",
+        "--dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducGJ6dGhoc2Nkc3dwem5idGFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMzQxMTIsImV4cCI6MjA4ODYxMDExMn0.hxugZkNt9uWYuCRjXfrb_RX2xI7GrzoU4ErKPnC6VtQ",
+        "--dart-define=SUPABASE_BUCKET=note-media"
       ]
     },
     {
@@ -40,7 +46,10 @@
         "--dart-define=FIREBASE_ANDROID_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
         "--dart-define=FIREBASE_IOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
         "--dart-define=FIREBASE_MACOS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
-        "--dart-define=FIREBASE_WINDOWS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY"
+        "--dart-define=FIREBASE_WINDOWS_API_KEY=AIzaSyD4gBeTPr2cD8pXa0cptuQTDxhy72XwzJY",
+        "--dart-define=SUPABASE_URL=https://wnpbzthhscdswpznbtar.supabase.co",
+        "--dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducGJ6dGhoc2Nkc3dwem5idGFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMzQxMTIsImV4cCI6MjA4ODYxMDExMn0.hxugZkNt9uWYuCRjXfrb_RX2xI7GrzoU4ErKPnC6VtQ",
+        "--dart-define=SUPABASE_BUCKET=note-media"
       ]
     }
   ]

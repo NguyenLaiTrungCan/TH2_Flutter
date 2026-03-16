@@ -5,9 +5,17 @@ class Note {
   final String title;
   final String content;
   final List<String> attachments;
+  final DateTime? dueAt;
   final DateTime modifiedAt;
 
-  Note({String? id, required this.title, required this.content, List<String>? attachments, DateTime? modifiedAt})
+  Note({
+    String? id,
+    required this.title,
+    required this.content,
+    List<String>? attachments,
+    this.dueAt,
+    DateTime? modifiedAt,
+  })
       : id = id ?? DateTime.now().microsecondsSinceEpoch.toString(),
         attachments = attachments ?? const [],
         modifiedAt = modifiedAt ?? DateTime.now();
@@ -16,7 +24,8 @@ class Note {
         'id': id,
         'title': title,
         'content': content,
-      'attachments': attachments,
+        'attachments': attachments,
+        'dueAt': dueAt?.toIso8601String(),
         'modifiedAt': modifiedAt.toIso8601String(),
       };
 
@@ -24,9 +33,12 @@ class Note {
         id: json['id'] as String?,
         title: json['title'] as String? ?? '',
         content: json['content'] as String? ?? '',
-      attachments: json['attachments'] != null
-        ? List<String>.from(json['attachments'] as List<dynamic>)
-        : const [],
+        attachments: json['attachments'] != null
+            ? List<String>.from(json['attachments'] as List<dynamic>)
+            : const [],
+        dueAt: json['dueAt'] != null
+            ? DateTime.tryParse(json['dueAt'] as String)
+            : null,
         modifiedAt: json['modifiedAt'] != null
             ? DateTime.parse(json['modifiedAt'] as String)
             : DateTime.now(),

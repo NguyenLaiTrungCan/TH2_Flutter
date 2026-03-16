@@ -4,8 +4,16 @@ import 'package:todo_list/models/note.dart';
 class NoteCard extends StatelessWidget {
   final Note note;
   final String timeText;
+  final String? dueText;
+  final VoidCallback? onAddToCalendar;
 
-  const NoteCard({super.key, required this.note, required this.timeText});
+  const NoteCard({
+    super.key,
+    required this.note,
+    required this.timeText,
+    this.dueText,
+    this.onAddToCalendar,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +39,51 @@ class NoteCard extends StatelessWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
+            if (dueText != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(
+                    Icons.schedule,
+                    size: 14,
+                    color: Colors.orange.shade700,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'Hạn: $dueText',
+                      style: TextStyle(
+                        color: Colors.orange.shade800,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 12),
             Row(
               children: [
-                const Spacer(),
-                Text(
-                  timeText,
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                Expanded(
+                  child: Text(
+                    timeText,
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                  ),
                 ),
+                if (onAddToCalendar != null)
+                  IconButton(
+                    tooltip: 'Thêm Google Calendar',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: onAddToCalendar,
+                    icon: Icon(
+                      Icons.event_available,
+                      color: Colors.green.shade700,
+                      size: 20,
+                    ),
+                  ),
               ],
             )
           ],
